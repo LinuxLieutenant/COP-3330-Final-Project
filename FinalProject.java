@@ -9,9 +9,22 @@ import java.util.Scanner;
 
 public class FinalProject {
 	
+	static void MainMenu() { //holds the menu, I decided against doing 7 print lines as he said to avoid redundancy 
+		System.out.println("*****************************************\n"
+				+ "1- Add a new Faculty to the schedule\n"
+				+ "2- Enroll a Student to a Lecture\n"
+				+ "3- Print the schedule of a Faculty\n"
+				+ "4- Print the schedule of an TA\n"
+				+ "5- Print the schedule of a Student\n"
+				+ "6- Delete a Lecture\n"
+				+ "7- Exit\n");
+	}
+	
 	public static void main(String[] args) {
 		Scanner scanner = new Scanner(System.in);
+		
 		System.out.println("Enter the absolute path of the file: ");
+		
 		while (true) {
 			String input = scanner.nextLine();
 			File file = new File(input);
@@ -21,11 +34,7 @@ public class FinalProject {
         	} else {
             	System.out.println("Sorry no such file.\nTry again:");
         	}
-		}
-		System.out.println("*******************************************");
-		
-		
-		
+		}		
 		
 		
 		
