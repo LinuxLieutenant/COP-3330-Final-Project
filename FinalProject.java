@@ -8,20 +8,20 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 public class FinalProject {
-	
-	static void mainMenu() { //holds the menu, I decided against doing 7 print lines as he said to avoid redundancy 
+	static void mainMenu() { 
 		System.out.println("*****************************************\n"
-				+ "\t1- Add a new Faculty to the schedule\n"
-				+ "\t2- Enroll a Student to a Lecture\n"
-				+ "\t3- Print the schedule of a Faculty\n"
-				+ "\t4- Print the schedule of an TA\n"
-				+ "\t5- Print the schedule of a Student\n"
-				+ "\t6- Delete a Lecture\n"
-				+ "\t7- Exit\n"
-				+ "\t\tEnter your choice:  ");
+				+ "1- Add a new Faculty to the schedule\n"
+				+ "2- Enroll a Student to a Lecture\n"
+				+ "3- Print the schedule of a Faculty\n"
+				+ "4- Print the schedule of an TA\n"
+				+ "5- Print the schedule of a Student\n"
+				+ "6- Delete a Lecture\n"
+				+ "7- Exit\n");
 	}
 	
 	public static void main(String[] args) {
+		ArrayList<Person> people = new ArrayList();
+		
 		String ucfID = "";
 		String name = "";
 		String rank = "";
@@ -59,28 +59,55 @@ public class FinalProject {
 			}catch(IdException e){
 				e.getStackTrace();
 			}
-				
-		}
 			
-			System.out.println("\tEnter name: ");
+			System.out.print("\tEnter name: "); //doesnt matter on format
 			stringInput = scanner.nextLine();
 			
-			System.out.println("Enter rank: ");
-			stringInput = scanner.nextLine();
-			if(stringInput.toLowerCase().contains("professor") || stringInput.toLowerCase().contains("adjunct")){ //come back to this later
-				if (rank.equalsIgnoreCase("professor")) {
+			while(true) {
+				System.out.print("Enter rank: ");
+				stringInput = scanner.nextLine();
+				if(stringInput.toLowerCase() == ("professor") || stringInput.toLowerCase() == ("associate professor") || stringInput.toLowerCase() == ("assistant professor") || stringInput.toLowerCase() == ("adjunct")){ 
 					rank = stringInput;
-				
+					break;
+				}
+				else {
+					System.out.print("Rank is not found");
+				}
 			}
-			
-			System.out.println("Enter office location: ");
+		
+			System.out.print("Enter office location: "); //format doesnt matter
 			officeLocation = scanner.nextLine();
 			
-			System.out.println("Enter how many lectures: ");
+			System.out.print("Enter how many lectures: "); //come back to later
 			lectures = scanner.nextLine();
+
 			
 			System.out.println("Enter the crns of the lectures: ");
 			lectureCRN = scanner.nextLine();
+		}
+		if(intInput == 2) {
+		}
+		if(intInput == 3) {
+		}
+		if(intInput == 4) {
+		}
+		if(intInput == 5) {
+		}
+		if(intInput == 6) {
+		}
+		if(intInput == 7) {
+			System.out.print("You have made a deletion of at least one lecture. Would you like to\r\n"
+					+ "print the copy of lec.txt? Enter y/Y for Yes or n/N for No: ");
+			stringInput = scanner.nextLine();
+			if(stringInput != "y" || stringInput != "n" || stringInput != "Y" || stringInput != "N") {
+				System.out.print("Is that a yes or no? Enter y/Y for Yes or n/N for No:");
+
+			}
+			else {
+				System.out.println("Bye!");
+				//add terminating thing here
+			}
+			
 		}
 		
 		
@@ -89,9 +116,106 @@ public class FinalProject {
 	}
 
 }
+
 class IdException extends Exception{
 	public IdException() {
-		super("Sorry, incorrect format. (IDs are 7 digits)"); //extends exception
+		super("Sorry, incorrect format. (IDs are 7 digits)");
 	}
+}
+
+abstract class Person{
+	private String name, id;
+	public Person(String name, String id) {
+		this.name = name;
+		this.id = id;
+	}
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	public String getId() {
+		return id;
+	}
+	public void setId(String id) {
+		this.id = id;
+	}
+}
+
+class Student extends Person{
+	private String type;
+	private String[] classesTaken;
+	public Student(String name, String id, String type, String[] classesTaken) {
+		super(name, id);
+		this.type = type;
+		this.classesTaken = classesTaken;
+	}
+	public String getType() {
+		return type;
+	}
+	public void setType(String type) {
+		this.type = type;
+	}
+	public String[] getClassesTaken() {
+		return classesTaken;
+	}
+	public void setClassesTaken(String[] classesTaken) {
+		this.classesTaken = classesTaken;
+	}
+	
+}
+
+class TA extends Student{
+	private String[] labsSupervised;
+	private String advisor, expectedDegree;
+	public TA(String name, String id, String type, String[] classesTaken, String[] labsSupervised, String advisor, String expectedDegree) {
+		super(name, id, type, classesTaken);
+		this.labsSupervised = labsSupervised;
+		this.advisor = advisor;
+		this.expectedDegree = expectedDegree;
+	}
+	public String[] getLabsSupervised() {
+		return labsSupervised;
+	}
+	public void setLabsSupervised(String[] labsSupervised) {
+		this.labsSupervised = labsSupervised;
+	}
+	public String getAdvisor() {
+		return advisor;
+	}
+	public void setAdvisor(String advisor) {
+		this.advisor = advisor;
+	}
+	public String getExpectedDegree() {
+		return expectedDegree;
+	}
+	public void setExpectedDegree(String expectedDegree) {
+		this.expectedDegree = expectedDegree;
+	}
+	
+}
+
+class Faculty extends Person{
+	private String rank;
+	String[] lecturesTaught;
+	public Faculty(String name, String ID, String rank, String[] lecturesTaught) {
+		super(name, ID);
+		this.rank = rank;
+		this.lecturesTaught = lecturesTaught;
+	}
+	public String getRank() {
+		return rank;
+	}
+	public void setRank(String rank) {
+		this.rank = rank;
+	}
+	public String[] getLecturesTaught() {
+		return lecturesTaught;
+	}
+	public void setLecturesTaught(String[] lecturesTaught) {
+		this.lecturesTaught = lecturesTaught;
+	}
+	
 }
 	
