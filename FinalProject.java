@@ -298,6 +298,7 @@ public class FinalProject {
 							lecturesArrayList = null;
 							for (String a : lecturesArray) {
 								facultyToUpdate.addLecturesTaught(a);
+							}
 							facultyToUpdate = (Faculty) person;
 							//facultyToUpdate.setLecturesTaught(lecturesArray);
 						}
