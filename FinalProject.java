@@ -130,10 +130,32 @@ public class FinalProject {
 			
 		}
 		if(intInput == 3) {
+			System.out.print("Enter the UCF id: ");
+			ucfID = scanner.nextLine();
+			Faculty facultyToPrint = null;
+			for(Person person : people) {
+				if(person instanceof Faculty && person.getId().equals(ucfID)) { 
+					facultyToPrint = (Faculty) person;
+					System.out.print(facultyToPrint.getId());
+					System.out.print("\n[insert name] is teaching the following lectures:"); //come back to later
+					System.out.print("\n[" + );
+					
+				}
+			}
+			
 		}
 		if(intInput == 4) {
+			System.out.println("Enter the TA's UCF id: ");
+			ucfID = scanner.nextLine();
+		//create if statement in while(true) loop that'll check if it exists, if not, it goes back to the menu	
 		}
 		if(intInput == 5) {
+			System.out.print("Enter the UCF id: ");
+			//if/else statement that checks if person exists
+			System.out.println("Record found:");
+			//prints full name
+			System.out.println("Enrolled in the following lectures:\n");
+			//prints out the lectures in this format: [COP5690/Programming Languages II]/[Lab: 30008]
 		}
 		if(intInput == 6) {
 			System.out.print("Enter the crn of the lecture to delete: ");
@@ -141,6 +163,7 @@ public class FinalProject {
 			//[36637/SOF2058/Introduction to Software] Deleted
 		}
 		if(intInput == 7) {
+			//checks if something has indeed been deleted before prompting this sys.out statement
 			System.out.print("You have made a deletion of at least one lecture. Would you like to\r\n"
 					+ "print the copy of lec.txt? Enter y/Y for Yes or n/N for No: ");
 			stringInput = scanner.nextLine();
@@ -150,7 +173,7 @@ public class FinalProject {
 			}
 			else {
 				System.out.println("Bye!");
-				//add terminating thing here
+
 			}
 			
 		}
