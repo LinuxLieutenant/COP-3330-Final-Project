@@ -24,7 +24,86 @@ public class FinalProject {
 		}
 		return false;
 	}
-	
+	static String getLecturePrefix(String CRN, String fileName) throws IOException{
+		String prefix = null;
+		String line;
+		BufferedReader fileInput = new BufferedReader(new FileReader(fileName));
+		while ((line = fileInput.readLine()) != null) {						
+	            String[] parts = line.split(",");
+	            if (line.length() > 2 && parts[0].equalsIgnoreCase(CRN)) {
+	            	prefix = parts[1];
+	            }
+		}
+		fileInput.close();
+		return prefix;
+	}
+	static String getLectureTitle(String CRN, String fileName) throws IOException{
+		String title = null;
+		String line;
+		BufferedReader fileInput = new BufferedReader(new FileReader(fileName));
+		while ((line = fileInput.readLine()) != null) {						
+	            String[] parts = line.split(",");
+	            if (line.length() > 2 && parts[0].equalsIgnoreCase(CRN)) {
+	            	title = parts[2];
+	            }
+		}
+		fileInput.close();
+		return title;
+	}
+	static String getLectureLevel(String CRN, String fileName) throws IOException{
+		String level = null;
+		String line;
+		BufferedReader fileInput = new BufferedReader(new FileReader(fileName));
+		while ((line = fileInput.readLine()) != null) {						
+	            String[] parts = line.split(",");
+	            if (line.length() > 2 && parts[0].equalsIgnoreCase(CRN)) {
+	            	level = parts[3];
+	            }
+		}
+		fileInput.close();
+		return level;
+	}
+	static String getLectureModality(String CRN, String fileName) throws IOException{
+		String modality = null;
+		String line;
+		BufferedReader fileInput = new BufferedReader(new FileReader(fileName));
+		while ((line = fileInput.readLine()) != null) {						
+	            String[] parts = line.split(",");
+	            if (line.length() > 2 && parts[0].equalsIgnoreCase(CRN)) {
+	            	modality = parts[4];
+	            }
+		}
+		fileInput.close();
+		return modality;
+	}
+	static String getLectureRoom(String CRN, String fileName) throws IOException{
+		String room = null;
+		String line;
+		BufferedReader fileInput = new BufferedReader(new FileReader(fileName));
+		while ((line = fileInput.readLine()) != null) {						
+	            String[] parts = line.split(",");
+	            if (line.length() > 2 && parts[0].equalsIgnoreCase(CRN)) {
+	            	room = parts[1];
+	            }
+		}
+		fileInput.close();
+		return room;
+	}
+	static String[] getLectureLab(String CRN, String fileName) throws IOException{
+		String[] labs = null;
+		String line;
+		BufferedReader fileInput = new BufferedReader(new FileReader(fileName));
+		while ((line = fileInput.readLine()) != null) {						
+	            String[] parts = line.split(",");
+	            if (line.length() > 2 && parts[0].equalsIgnoreCase(CRN) && parts[6].equalsIgnoreCase("yes")) {
+	            	while((parts = fileInput.readLine().split(",")).length < 3) {
+	            		labs = parts;
+	            	}
+	            }
+		}
+		fileInput.close();
+		return labs;
+	}
 	public static void main(String[] args) throws IOException{
 		ArrayList<Person> people = new ArrayList();
 		
@@ -98,9 +177,12 @@ public class FinalProject {
 					BufferedReader fileInput = new BufferedReader(new FileReader("lec.txt"));
 					while ((line = fileInput.readLine()) != null) {						
 				            String[] parts = line.split(",");
-				            if (parts.length > 5 && parts[6].equalsIgnoreCase("Yes")) {				//If the length is greater than 5 and the 7th element is No then this class has no lab and the info will be added to the array.
-				            	
+				            if (parts.length > 5 && parts[0].equalsIgnoreCase(a)) {
+					            if (parts[5].equalsIgnoreCase("Yes")) {			
+					            	
+					            }
 				            }
+
 					 }
 					fileInput.close();
 				}
@@ -141,10 +223,32 @@ public class FinalProject {
 			System.out.println("Student Enrolled!");
 		}
 		if(intInput == 3) {
+			System.out.print("Enter the UCF id: ");
+			ucfID = scanner.nextLine();
+			Faculty facultyToPrint = null;
+			for(Person person : people) {
+				if(person instanceof Faculty && person.getId().equals(ucfID)) { 
+					facultyToPrint = (Faculty) person;
+					System.out.print(facultyToPrint.getId());
+					System.out.print("\n[insert name] is teaching the following lectures:"); //come back to later
+					System.out.print("\n["  );
+					
+				}
+			}
+			
 		}
 		if(intInput == 4) {
+			System.out.println("Enter the TA's UCF id: ");
+			ucfID = scanner.nextLine();
+		//create if statement in while(true) loop that'll check if it exists, if not, it goes back to the menu	
 		}
 		if(intInput == 5) {
+			System.out.print("Enter the UCF id: ");
+			//if/else statement that checks if person exists
+			System.out.println("Record found:");
+			//prints full name
+			System.out.println("Enrolled in the following lectures:\n");
+			//prints out the lectures in this format: [COP5690/Programming Languages II]/[Lab: 30008]
 		}
 		if(intInput == 6) {
 			System.out.print("Enter the crn of the lecture to delete: ");
@@ -174,7 +278,7 @@ public class FinalProject {
 
 class IdException extends Exception{
 	public IdException() {
-		super("Sorry, incorrect format. (IDs are 7 digits)");
+		super(">>>>>>>>>>>>Sorry, incorrect format. (IDs are 7 digits)");
 	}
 }
 
