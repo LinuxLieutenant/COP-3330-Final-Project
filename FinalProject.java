@@ -4,8 +4,7 @@
 - (optional) Add anything that you would like the TA to be aware of
 */
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Scanner;
+import java.util.*;
 
 public class FinalProject {
 	static void mainMenu() { //holds the menu, I decided against doing 7 print lines as he said to avoid redundancy 
@@ -26,7 +25,7 @@ public class FinalProject {
 		return false;
 	}
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException{
 		ArrayList<Person> people = new ArrayList();
 		
 		String ucfID;
@@ -36,6 +35,8 @@ public class FinalProject {
 		String lectures;
 		String lectureCRN;
 		String[] lecturesArray;
+		String fileName;
+		String line;
 		
 		Scanner scanner = new Scanner(System.in);
 		int intInput;
@@ -44,8 +45,8 @@ public class FinalProject {
 		System.out.println("Enter the absolute path of the file: ");
 		
 		while (true) {
-			stringInput = scanner.nextLine();
-			File file = new File(stringInput);
+			fileName = scanner.nextLine();
+			File file = new File(fileName);
         	if (file.exists()) {
             	System.out.println("File Found! Let's proceed...");
             	break;
@@ -60,6 +61,7 @@ public class FinalProject {
 			
 			while(true) {
 				System.out.println("\tEnter UCF id: ");
+				stringInput = scanner.nextLine();
 				stringInput = scanner.nextLine();
 				try{
 					if(stringInput.length() != 7) {
@@ -78,12 +80,12 @@ public class FinalProject {
 				while(true) {
 					System.out.print("Enter rank: ");
 					stringInput = scanner.nextLine();
-					if(stringInput.toLowerCase() == ("professor") || stringInput.toLowerCase() == ("associate professor") || stringInput.toLowerCase() == ("assistant professor") || stringInput.toLowerCase() == ("adjunct")){ 
+					if(stringInput.toLowerCase().equals ("professor") || stringInput.toLowerCase().equals ("associate professor") || stringInput.toLowerCase().equals ("assistant professor") || stringInput.toLowerCase().equals ("adjunct")){ 
 						rank = stringInput;
 						break;
 					}
 					else {
-						System.out.print("Rank is not found");
+						System.out.println("Rank is not found");
 					}
 				}
 				System.out.println("Enter how many lectures: ");
@@ -92,6 +94,16 @@ public class FinalProject {
 				System.out.println("Enter the crns of the lectures separated by ,: ");
 				lectureCRN = scanner.nextLine();
 				lecturesArray = lectureCRN.split(",");
+				for (String a : lecturesArray) {
+					BufferedReader fileInput = new BufferedReader(new FileReader("lec.txt"));
+					while ((line = fileInput.readLine()) != null) {						
+				            String[] parts = line.split(",");
+				            if (parts.length > 5 && parts[6].equalsIgnoreCase("Yes")) {				//If the length is greater than 5 and the 7th element is No then this class has no lab and the info will be added to the array.
+				            	
+				            }
+					 }
+					fileInput.close();
+				}
 				System.out.println("Enter office location: ");
 				officeLocation = scanner.nextLine();
 				
@@ -112,6 +124,21 @@ public class FinalProject {
 			}
 		}
 		if(intInput == 2) {
+			System.out.print("Enter UCF id: ");
+			stringInput = scanner.nextLine();
+			
+			System.out.print("Record found/Name: (enter the person's name here)"); //*****needs the name printed******
+			
+			System.out.print("Which lecture to enroll [] in?"); //*****needs the name printed in the brackets******
+			
+			//[COP5690/Programming Languages II] has these labs:
+				//19005,MSB-103
+				//30008,PSY-107
+				//20300,HSA1-16
+			
+			//[Erick Johann] is added to lab : 30008
+			
+			System.out.println("Student Enrolled!");
 		}
 		if(intInput == 3) {
 		}
@@ -120,6 +147,9 @@ public class FinalProject {
 		if(intInput == 5) {
 		}
 		if(intInput == 6) {
+			System.out.print("Enter the crn of the lecture to delete: ");
+			stringInput = scanner.nextLine();
+			//[36637/SOF2058/Introduction to Software] Deleted
 		}
 		if(intInput == 7) {
 			System.out.print("You have made a deletion of at least one lecture. Would you like to\r\n"
