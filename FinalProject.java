@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 public class FinalProject {
-	static void mainMenu() { 
+	static void mainMenu() { //holds the menu, I decided against doing 7 print lines as he said to avoid redundancy 
 		System.out.println("*****************************************\n"
 				+ "1- Add a new Faculty to the schedule\n"
 				+ "2- Enroll a Student to a Lecture\n"
@@ -18,16 +18,24 @@ public class FinalProject {
 				+ "6- Delete a Lecture\n"
 				+ "7- Exit\n");
 	}
+	static boolean checkID(ArrayList<Person> people, String idToCheck) {
+		for (Person person : people) {
+			if (person.getId().equals(idToCheck))
+				return true;
+		}
+		return false;
+	}
 	
 	public static void main(String[] args) {
 		ArrayList<Person> people = new ArrayList();
 		
-		String ucfID = "";
-		String name = "";
-		String rank = "";
-		String officeLocation = "";
-		String lectures = "";
-		String lectureCRN = "";
+		String ucfID;
+		String name;
+		String rank;
+		String officeLocation;
+		String lectures;
+		String lectureCRN;
+		String[] lecturesArray;
 		
 		Scanner scanner = new Scanner(System.in);
 		int intInput;
@@ -50,42 +58,76 @@ public class FinalProject {
 		
 		if(intInput == 1) {
 			
-			System.out.println("\tEnter UCF id: ");
-			stringInput = scanner.nextLine();
-			try{
-				if(stringInput.length() != 7) {
-					throw new IdException();
-				}
-			}catch(IdException e){
-				e.getStackTrace();
-			}
-			
-			System.out.print("\tEnter name: "); //doesnt matter on format
-			stringInput = scanner.nextLine();
-			
 			while(true) {
-				System.out.print("Enter rank: ");
+				System.out.println("Enter UCF id: ");
 				stringInput = scanner.nextLine();
-				if(stringInput.toLowerCase() == ("professor") || stringInput.toLowerCase() == ("associate professor") || stringInput.toLowerCase() == ("assistant professor") || stringInput.toLowerCase() == ("adjunct")){ 
-					rank = stringInput;
-					break;
+				try{
+					if(stringInput.length() != 7) {
+						throw new IdException();
+					}
+				}catch(IdException e){
+					e.getStackTrace();
 				}
-				else {
-					System.out.print("Rank is not found");
+				ucfID = stringInput;
+				break;
+			}
+			if (checkID(people, ucfID) == false) {
+				System.out.println("Enter name: ");
+				name = scanner.nextLine();
+				
+				while(true) {
+					System.out.print("Enter rank: ");
+					stringInput = scanner.nextLine();
+					if(stringInput.toLowerCase() == ("professor") || stringInput.toLowerCase() == ("associate professor") || stringInput.toLowerCase() == ("assistant professor") || stringInput.toLowerCase() == ("adjunct")){ 
+						rank = stringInput;
+						break;
+					}
+					else {
+						System.out.print("Rank is not found");
+					}
+				}
+				System.out.println("Enter how many lectures: ");
+				lectures = scanner.nextLine();
+					
+				System.out.println("Enter the crns of the lectures separated by ,: ");
+				lectureCRN = scanner.nextLine();
+				lecturesArray = lectureCRN.split(",");
+				System.out.println("Enter office location: ");
+				officeLocation = scanner.nextLine();
+				
+				Faculty faculty = new Faculty(ucfID, name, rank, lecturesArray, officeLocation);			
+			}else {
+				Faculty facultyToUpdate = null;
+				for (Person person : people) {
+					if(person instanceof Faculty && person.getId().equals(ucfID)) {
+						System.out.println("Enter how many lectures: ");
+						lectures = scanner.nextLine();
+						System.out.println("Enter the crns of the lectures: ");
+						lectureCRN = scanner.nextLine();
+						lecturesArray = lectureCRN.split(",");
+						facultyToUpdate = (Faculty) person;
+						facultyToUpdate.setLecturesTaught(lecturesArray);
+					}
 				}
 			}
-		
-			System.out.print("Enter office location: "); //format doesnt matter
-			officeLocation = scanner.nextLine();
-			
-			System.out.print("Enter how many lectures: "); //come back to later
-			lectures = scanner.nextLine();
-
-			
-			System.out.println("Enter the crns of the lectures: ");
-			lectureCRN = scanner.nextLine();
 		}
 		if(intInput == 2) {
+			System.out.print("Enter UCF id: ");
+			stringInput = scanner.nextLine();
+			
+			System.out.print("Record found/Name: (enter the person's name here)"); //*****needs the name printed******
+			
+			System.out.print("Which lecture to enroll [] in?"); //*****needs the name printed in the brackets******
+			
+			//[COP5690/Programming Languages II] has these labs:
+				//19005,MSB-103
+				//30008,PSY-107
+				//20300,HSA1-16
+			
+			//[Erick Johann] is added to lab : 30008
+			
+			System.out.println("Student Enrolled!");
+			
 		}
 		if(intInput == 3) {
 		}
@@ -94,6 +136,9 @@ public class FinalProject {
 		if(intInput == 5) {
 		}
 		if(intInput == 6) {
+			System.out.print("Enter the crn of the lecture to delete: ");
+			stringInput = scanner.nextLine();
+			//[36637/SOF2058/Introduction to Software] Deleted
 		}
 		if(intInput == 7) {
 			System.out.print("You have made a deletion of at least one lecture. Would you like to\r\n"
@@ -109,7 +154,6 @@ public class FinalProject {
 			}
 			
 		}
-		
 		
 		
 		scanner.close();
@@ -197,9 +241,9 @@ class TA extends Student{
 }
 
 class Faculty extends Person{
-	private String rank;
+	private String rank, officeLocation;
 	String[] lecturesTaught;
-	public Faculty(String name, String ID, String rank, String[] lecturesTaught) {
+	public Faculty(String ID, String name, String rank, String[] lecturesTaught, String officeLocation) {
 		super(name, ID);
 		this.rank = rank;
 		this.lecturesTaught = lecturesTaught;
@@ -210,6 +254,12 @@ class Faculty extends Person{
 	public void setRank(String rank) {
 		this.rank = rank;
 	}
+	public String getOfficeLocation() {
+		return officeLocation;
+	}
+	public void setOfficelocation(String officeLocation) {
+		this.officeLocation = officeLocation;
+	}
 	public String[] getLecturesTaught() {
 		return lecturesTaught;
 	}
@@ -218,4 +268,3 @@ class Faculty extends Person{
 	}
 	
 }
-	
