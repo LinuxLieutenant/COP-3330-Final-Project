@@ -17,12 +17,28 @@ public class FinalProject {
 				+ "6- Delete a Lecture\n"
 				+ "7- Exit\n");
 	}
-	static boolean checkID(ArrayList<Person> people, String idToCheck) {
+	static boolean checkExists(ArrayList<Person> people, String idToCheck) {
 		for (Person person : people) {
 			if (person.getId().equals(idToCheck))
 				return true;
 		}
 		return false;
+	}
+	static boolean checkIdFormat(String idToCheck) {
+		String input = idToCheck;
+		while(true) {
+			try{
+				if(input.length() != 7 || checkNumeric(input) == false) {
+					throw new IdException();
+				}else {
+					return true;
+				}
+			}catch(IdException e){
+				e.getStackTrace();
+				System.out.println(e.getMessage());
+				return false;
+			}
+		}
 	}
 	static String getLecturePrefix(String CRN, String fileName) throws IOException{
 		String prefix = null;
@@ -135,6 +151,19 @@ public class FinalProject {
 	        System.out.println(person.toString());
 	    }
 	}
+	static boolean checkIfStudent(ArrayList<Person> people, String id, String lab) {
+		for (Person person : people) {
+			if(person instanceof Student && person.getId().equals(id)) {
+				Student temp = (Student) person;
+				String[] classesTaken = temp.getClassesTaken();
+				for (String a : classesTaken) {
+					if (a.equals(lab))
+						return true;
+				}
+			}
+	    }
+		return false;
+	}
 	public static void main(String[] args) throws IOException{
 		ArrayList<Person> people = new ArrayList();
 		
@@ -148,6 +177,7 @@ public class FinalProject {
 		String fileName;
 		String line;
 		List<String> labs = new ArrayList<>();
+		List<String> lecturesArrayList = new ArrayList<>();
 		
 		Scanner scanner = new Scanner(System.in);
 		int intInput;
@@ -164,7 +194,7 @@ public class FinalProject {
             	System.out.println("Sorry no such file.\nTry again:");
         	}
 		}
-		System.out.println(getLab("69745", fileName));
+		//System.out.println(getLab("69745", fileName));
 		while (true){
 			//printAllPeople(people);
 			mainMenu(); //calls method
@@ -187,7 +217,7 @@ public class FinalProject {
 						System.out.println(e.getMessage());
 					}
 				}
-				if (checkID(people, ucfID) == false) {
+				if (checkExists(people, ucfID) == false) {
 					System.out.println("Enter name: ");
 					name = scanner.nextLine();
 					name = scanner.nextLine();
@@ -220,12 +250,39 @@ public class FinalProject {
 							}
 							for (String b : labs) {
 								String[] parts = b.split(",");
-								System.out.println("Enter the TA's id for " + parts[0]);
+								while (true) {
+									System.out.println("Enter the TA's id for " + parts[0]);
+									ucfID = scanner.nextLine();
+									if (checkIdFormat(ucfID) == true)
+										break;
+								}
+									if (checkExists(people, ucfID) == true) {
+										if (checkIfStudent(people, ucfID, b) == false) {
+											TA taToUpdate = null;
+											for (Person person : people) {
+												if(person instanceof TA && person.getId().equals(ucfID)) {
+													taToUpdate = (TA) person;
+													taToUpdate.addLabsSupervised(b);
+												}
+											}
+										}else {
+											System.out.println("Sorry, The TA that you entered was found to be a student taking that lecture.");
+										}
+									}else if(checkExists(people, ucfID) == false){
+										if (checkIfStudent(people, ucfID, b) == false) {
+											//Call Lily's method to add a faculty with this ID
+										}else {
+											System.out.println("Sorry, The TA that you entered was found to be a student taking that lecture.");
+										}
+									}
 							}
 						}
 					}
-					
-					Faculty faculty = new Faculty(ucfID, name, rank, lecturesArray, officeLocation);
+					lecturesArrayList = null;
+					for (String a : lecturesArray) {
+						lecturesArrayList.add(a);
+					}
+					Faculty faculty = new Faculty(ucfID, name, rank, lecturesArrayList, officeLocation);
 					people.add(faculty);
 
 				}else {
@@ -238,8 +295,11 @@ public class FinalProject {
 							System.out.println("Enter the crns of the lectures: ");
 							lectureCRN = scanner.nextLine();
 							lecturesArray = lectureCRN.split(",");
+							lecturesArrayList = null;
+							for (String a : lecturesArray) {
+								facultyToUpdate.addLecturesTaught(a);
 							facultyToUpdate = (Faculty) person;
-							facultyToUpdate.setLecturesTaught(lecturesArray);
+							//facultyToUpdate.setLecturesTaught(lecturesArray);
 						}
 					}
 				}
@@ -382,19 +442,22 @@ class Student extends Person{
 }
 
 class TA extends Student{
-	private String[] labsSupervised;
+	private List<String> labsSupervised;
 	private String advisor, expectedDegree;
-	public TA(String name, String id, String type, String[] classesTaken, String[] labsSupervised, String advisor, String expectedDegree) {
+	public TA(String name, String id, String type, String[] classesTaken, List<String> labsSupervised, String advisor, String expectedDegree) {
 		super(name, id, type, classesTaken);
 		this.labsSupervised = labsSupervised;
 		this.advisor = advisor;
 		this.expectedDegree = expectedDegree;
 	}
-	public String[] getLabsSupervised() {
+	public List<String> getLabsSupervised() {
 		return labsSupervised;
 	}
-	public void setLabsSupervised(String[] labsSupervised) {
+	public void setLabsSupervised(List<String> labsSupervised) {
 		this.labsSupervised = labsSupervised;
+	}
+	public void addLabsSupervised(String labsSupervised) {
+		this.labsSupervised.add(labsSupervised);
 	}
 	public String getAdvisor() {
 		return advisor;
@@ -410,7 +473,7 @@ class TA extends Student{
 	}
 	@Override
 	public String toString() {
-		return "TA [labsSupervised=" + Arrays.toString(labsSupervised) + ", advisor=" + advisor + ", expectedDegree="
+		return "TA [labsSupervised=" + (labsSupervised.toString()) + ", advisor=" + advisor + ", expectedDegree="
 				+ expectedDegree + ", getType()=" + getType() + ", getClassesTaken()="
 				+ Arrays.toString(getClassesTaken()) + ", getName()=" + getName() + ", getId()=" + getId() + "]";
 	}
@@ -420,8 +483,8 @@ class TA extends Student{
 
 class Faculty extends Person{
 	private String rank, officeLocation;
-	String[] lecturesTaught;
-	public Faculty(String ID, String name, String rank, String[] lecturesTaught, String officeLocation) {
+	List<String> lecturesTaught;
+	public Faculty(String ID, String name, String rank, List<String> lecturesTaught, String officeLocation) {
 		super(name, ID);
 		this.rank = rank;
 		this.officeLocation = officeLocation;
@@ -439,16 +502,19 @@ class Faculty extends Person{
 	public void setOfficelocation(String officeLocation) {
 		this.officeLocation = officeLocation;
 	}
-	public String[] getLecturesTaught() {
+	public List<String> getLecturesTaught() {
 		return lecturesTaught;
 	}
-	public void setLecturesTaught(String[] lecturesTaught) {
+	public void setLecturesTaught(List<String> lecturesTaught) {
 		this.lecturesTaught = lecturesTaught;
+	}
+	public void addLecturesTaught(String lecture) {
+		this.lecturesTaught.add(lecture);
 	}
 	@Override
 	public String toString() {
 		return "Faculty [ID =" + getId() + "name =" + getName() + "rank=" + rank + ", officeLocation=" + officeLocation + ", lecturesTaught="
-				+ Arrays.toString(lecturesTaught) + "]";
+				+ lecturesTaught.toString() + "]";
 	}
 	
 	
