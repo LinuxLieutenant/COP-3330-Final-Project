@@ -227,34 +227,41 @@ public class FinalProject {
 	}
 	static void deleteLecture(String CRN, String fileName) throws IOException {
 		String line;
-		boolean readingLabs = false;
-		Integer lineIndex = 1;
-		List<Integer> toDelete = new ArrayList<>();
-		BufferedReader fileInput = new BufferedReader(new FileReader(fileName));
-		while ((line = fileInput.readLine()) != null) {		
-	            String[] parts = line.split(",");
-		        if (parts.length > 5 && parts[0].equalsIgnoreCase(CRN) && parts[6].equalsIgnoreCase("yes")) {
-		           readingLabs = true;
-		           toDelete.add(lineIndex);
-		        }
-		        else if(parts.length == 2 && readingLabs == true) {
-		        	toDelete.add(lineIndex);
-		        }
-		        else if(parts.length > 2 && readingLabs == true)
-		        	readingLabs = false;
-		        lineIndex++;
-		}
-		Path filePath = Paths.get(fileName);
-		for (Integer index : toDelete) {
-			try {
-				List<String> fileContent = new ArrayList<>(Files.readAllLines(filePath));
-				fileContent.remove(index);
-				Files.write(filePath, fileContent, StandardCharsets.UTF_8);
-			}catch(IOException e) {
-				System.err.println("Error deleting line from file " + e.getMessage());
-			}
-		}
-		fileInput.close();		
+	    boolean readingLabs = false;
+	    Integer lineIndex = 0;
+	    List<Integer> toDelete = new ArrayList<>();
+	    BufferedReader fileInput = new BufferedReader(new FileReader(fileName));
+	    while ((line = fileInput.readLine()) != null) {
+	        lineIndex++;
+	        String[] parts = line.split(",");
+	        if (parts.length > 0 && parts[0].equalsIgnoreCase(CRN)) {
+	            toDelete.add(lineIndex);
+	            if (parts.length > 5 && parts[6].equalsIgnoreCase("yes")) {
+	                // Delete all two-element entries under this lecture
+	            	readingLabs = true;
+	                String labLine;
+	                Integer labLineIndex = lineIndex;
+	                while ((labLine = fileInput.readLine()) != null) {
+	                    labLineIndex++;
+	                    String[] labParts = labLine.split(",");
+	                    if (labParts.length == 2) {
+	                        toDelete.add(labLineIndex);
+	                    } else {
+	                    	readingLabs = false;
+	                        break;
+	                    }
+	                }
+	            }
+	        }
+	    }
+	    Path filePath = Paths.get(fileName);
+	    List<String> fileContent = new ArrayList<>(Files.readAllLines(filePath, StandardCharsets.UTF_8));
+	    for (Integer index : toDelete) {
+	        fileContent.set(index - 1, null);
+	    }
+	    fileContent.removeIf(lineToRemove -> lineToRemove == null);
+	    Files.write(filePath, fileContent, StandardCharsets.UTF_8);
+	    fileInput.close();
 	}
 	/*static String getLectureInfo(String CRN, String fileName) throws IOException{
 		String line;
