@@ -3,6 +3,7 @@
 - Logan McBride, Lily Yarbrough
 - (optional) Add anything that you would like the TA to be aware of
 - C:\Users\Logan\eclipse-workspace\Java Final Project\lec.txt
+- C:\Users\lyren\eclipse-workspace\Final Project\lec.txt
 */
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -343,6 +344,7 @@ public class FinalProject {
 		
 		String ucfID = null;
 		String name;
+		String name2;
 		String rank;
 		String officeLocation;
 		String lectures;
@@ -456,7 +458,7 @@ public class FinalProject {
 									}else if(checkExists(people, ucfID2) == false){
 										if (checkIfStudent(people, ucfID2, b) == false) {
 											System.out.print("Name of TA: "); //asking for TA name
-											name = scanner.nextLine();
+											name2 = scanner.nextLine();
 											System.out.print("TA’s supervisor’s name: "); //asks for super. name
 											//scanner.nextLine();
 											String supervisorName = scanner.nextLine();
@@ -471,7 +473,7 @@ public class FinalProject {
 													break; //leaves the while-true
 												}
 											}
-											TA ta = new TA(name,ucfID2,"graduate",null,null,supervisorName,expectedDegree);
+											TA ta = new TA(name2,ucfID2,"graduate",null,null,supervisorName,expectedDegree);
 											ta.addLabsSupervised(b);
 											people.add(ta);
 											//System.out.println("[" + a + "/" + getLecturePrefix(a, fileName) + "/" + getLectureTitle(a, fileName) + "]" + " Added!");
@@ -538,10 +540,8 @@ public class FinalProject {
 										}
 									}else if(checkExists(people, ucfID2) == false){
 										if (checkIfStudent(people, ucfID2, b) == false) {
-											//Call Lily's method to add a faculty with this ID
 											System.out.print("Name of TA: "); //asking for TA name
-											name = scanner.nextLine();
-											//name = scanner.nextLine();
+											name2 = scanner.nextLine();
 											System.out.print("TA’s supervisor’s name: "); //asks for super. name
 											String supervisorName = scanner.nextLine();
 											String expectedDegree = "";
@@ -555,7 +555,7 @@ public class FinalProject {
 													break; //leaves the while-true
 												}
 											}
-											TA ta = new TA(name,ucfID2,"graduate",null,null,supervisorName,expectedDegree);
+											TA ta = new TA(name2,ucfID2,"graduate",null,null,supervisorName,expectedDegree);
 											ta.addLabsSupervised(b);
 											people.add(ta);
 											System.out.println("[" + a + "/" + getLecturePrefix(a, fileName) + "/" + getLectureTitle(a, fileName) + "]" + " Added!");
@@ -578,7 +578,7 @@ public class FinalProject {
 				}
 			}
 //------------------------------------Option 2-------------------------------------------
-			if(stringInput.equals("2")) {
+			else if(stringInput.equals("2")) {
 				while(true) {
 					System.out.println("Enter UCF id: ");
 					stringInput = scanner.nextLine();
@@ -695,7 +695,7 @@ public class FinalProject {
 				}
 			}
 //-------------------------------------Option 3-----------------------------------------
-			if(stringInput.equals("3")) {
+			else if(stringInput.equals("3")) {
 				while(true) {
 					System.out.println("Enter UCF id: ");
 					stringInput = scanner.nextLine();
@@ -712,7 +712,7 @@ public class FinalProject {
 					}
 				}
 				if (checkExists(people, ucfID) == true) {
-					System.out.println(findName(people, ucfID) + "is teaching the following lectures:");
+					System.out.println(findName(people, ucfID) + " is teaching the following lectures:");
 					Faculty facultyToPrint = null;
 					List<String> lecturesTaught;
 					for(Person person : people) {
@@ -737,7 +737,7 @@ public class FinalProject {
 				}				
 			}
 //---------------------------------Option 4---------------------------------------------------
-			if(stringInput.equals("5")) {
+			else if(stringInput.equals("4")) {
 				while(true) {
 					System.out.println("Enter UCF id: ");
 					stringInput = scanner.nextLine();
@@ -773,7 +773,7 @@ public class FinalProject {
 				}				
 			}
 //--------------------------------Option 5--------------------------------------------
-			if(stringInput.equals("5")) {
+			else if(stringInput.equals("5")) {
 				while(true) {
 					System.out.println("Enter student UCF id: ");
 					stringInput = scanner.nextLine();
@@ -806,10 +806,6 @@ public class FinalProject {
 										}
 									}
 									System.out.println("[" + getLecturePrefix(classes, fileName) + "/" + getLectureTitle(classes, fileName) + "]/[Lab: " + labSection + "]");
-									//labs = getLab(classes, fileName);
-									for (String lab : labs) {
-										System.out.println(lab);
-									}
 								} else {
 									System.out.println("[" + getLecturePrefix(classes, fileName) + "/" + getLectureTitle(classes, fileName) + "]" + "[" + getLectureModality(classes, fileName) + "]");
 								}
@@ -821,7 +817,7 @@ public class FinalProject {
 				}
 			}
 //-----------------------------------------Option 6------------------------------------------------
-			if(stringInput.equals("6")) {
+			else if(stringInput.equals("6")) {
 				System.out.print("Enter the crn of the lecture to delete: ");
 				lectureCRN = scanner.nextLine();
 				//lectureCRN = scanner.nextLine();
@@ -845,7 +841,7 @@ public class FinalProject {
 				deleteLecture(lectureCRN, fileName);
 			}
 //--------------------------------------Option 7-------------------------------------
-			if(stringInput.equals("7")) {
+			else if(stringInput.equals("7")) {
 				System.out.print("You have made a deletion of at least one lecture. Would you like to\r\n"
 						+ "print the copy of lec.txt? Enter y/Y for Yes or n/N for No: ");
 				stringInput = scanner.nextLine();
