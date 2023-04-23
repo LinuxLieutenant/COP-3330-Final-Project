@@ -1,7 +1,7 @@
 /*
 - COP 3330 Final Project.
 - Logan McBride, Lily Yarbrough
-- (optional) Add anything that you would like the TA to be aware of
+- Hello to the TA grading this! The code might look a little messy, but we tried our best :)
 - C:\Users\Logan\eclipse-workspace\Java Final Project\lec.txt
 - C:\Users\lyren\eclipse-workspace\Final Project\lec.txt
 */
