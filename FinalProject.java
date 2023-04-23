@@ -322,10 +322,13 @@ public class FinalProject {
 	            String labLine;
 	            while ((labLine = fileInput.readLine()) != null) {
 	               String[] labParts = labLine.split(",");
-	               if (labParts.length == 2 && labParts[0].equalsIgnoreCase(labCRN)) {
-	            	   isLab = true;
-	            	   return isLab;
-	               } else {
+	               if (labParts.length == 2) {
+	            	   if (labParts[0].equalsIgnoreCase(labCRN)) {
+	            		  isLab = true;
+	            		  return isLab;
+	            	   }
+	            
+	               } else if (labParts.length > 2) {
 	            	   readingLabs = false;
 	            	   isLab = false;
 	                   break;
@@ -521,7 +524,7 @@ public class FinalProject {
 								String[] parts = b.split(",");
 								String ucfID2;
 								while (true) {
-									System.out.println("Enter the TA's id for " + parts[0]);
+									System.out.println("Enter the TA's id for " + parts[0] + ":");
 									ucfID2 = scanner.nextLine();
 									if (checkIdFormat(ucfID2) == true)
 										break;
@@ -567,7 +570,7 @@ public class FinalProject {
 						} else {
 							System.out.println("[" + a + "/" + getLecturePrefix(a, fileName) + "/" + getLectureTitle(a, fileName) + "]" + " Added!");
 						}
-						for (Person b : people) {
+						for (Person b : people) {	//Check if person is faculty
 							Faculty temp = (Faculty) b;
 							if (b.getId().equalsIgnoreCase(ucfID)) {
 								temp.addLecturesTaught(a);
@@ -611,7 +614,7 @@ public class FinalProject {
 								i++;
 							}
 							Random random = new Random();
-							int randomInt = random.nextInt(labs.size()-1);
+							int randomInt = random.nextInt(labs.size());
 							String labAssigned = labArray[randomInt];
 							System.out.println("[" + findName(people, ucfID) + "] is added to lab : " + labAssigned);
 							System.out.println("Student enrolled!");
@@ -790,24 +793,24 @@ public class FinalProject {
 					}
 				}
 				if (checkExists(people, ucfID) == true) {
-					System.out.println(findName(people, ucfID) + "is enrolled in the following lectures:");
+					System.out.println(findName(people, ucfID) + " is enrolled in the following lectures:");
 					Student studentToPrint;
 					List<String> classesTaken;
 					for(Person person : people) {
 						if(person instanceof Student && person.getId().equals(ucfID)) { 
 							studentToPrint = (Student) person;
 							classesTaken = studentToPrint.getClassesTaken();
+							String labSection = "";
 							for (String classes : classesTaken) {
 								if (hasLab(classes, fileName) == true) {
-									String labSection = null;
 									for (String labsTaken : classesTaken) {
 										if (checkIfLabMatches(labsTaken, classes, fileName) == true) {
 											labSection = labsTaken;
 										}
 									}
 									System.out.println("[" + getLecturePrefix(classes, fileName) + "/" + getLectureTitle(classes, fileName) + "]/[Lab: " + labSection + "]");
-								} else {
-									System.out.println("[" + getLecturePrefix(classes, fileName) + "/" + getLectureTitle(classes, fileName) + "]" + "[" + getLectureModality(classes, fileName) + "]");
+								} else if (hasLab(classes, fileName) == false) {
+									System.out.println(getLectureInfo(classes, fileName));
 								}
 							}
 						}
