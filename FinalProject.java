@@ -5,6 +5,10 @@
 - C:\Users\Logan\eclipse-workspace\Java Final Project\lec.txt
 */
 import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 public class FinalProject {
@@ -220,6 +224,37 @@ public class FinalProject {
 			}
 		}
 		return null;
+	}
+	static void deleteLecture(String CRN, String fileName) throws IOException {
+		String line;
+		boolean readingLabs = false;
+		Integer lineIndex = 1;
+		List<Integer> toDelete = new ArrayList<>();
+		BufferedReader fileInput = new BufferedReader(new FileReader(fileName));
+		while ((line = fileInput.readLine()) != null) {		
+	            String[] parts = line.split(",");
+		        if (parts.length > 5 && parts[0].equalsIgnoreCase(CRN) && parts[6].equalsIgnoreCase("yes")) {
+		           readingLabs = true;
+		           toDelete.add(lineIndex);
+		        }
+		        else if(parts.length == 2 && readingLabs == true) {
+		        	toDelete.add(lineIndex);
+		        }
+		        else if(parts.length > 2 && readingLabs == true)
+		        	readingLabs = false;
+		        lineIndex++;
+		}
+		Path filePath = Paths.get(fileName);
+		for (Integer index : toDelete) {
+			try {
+				List<String> fileContent = new ArrayList<>(Files.readAllLines(filePath));
+				fileContent.remove(index);
+				Files.write(filePath, fileContent, StandardCharsets.UTF_8);
+			}catch(IOException e) {
+				System.err.println("Error deleting line from file " + e.getMessage());
+			}
+		}
+		fileInput.close();		
 	}
 	/*static String getLectureInfo(String CRN, String fileName) throws IOException{
 		String line;
@@ -715,30 +750,60 @@ public class FinalProject {
 					System.out.println("Sorry no Student found.");
 				}
 			}
-//
+//-----------------------------------------Option 6------------------------------------------------
 			if(intInput == 6) {
 				System.out.print("Enter the crn of the lecture to delete: ");
-				stringInput = scanner.nextLine();
-				//[36637/SOF2058/Introduction to Software] Deleted
+				lectureCRN = scanner.nextLine();
+				lectureCRN = scanner.nextLine();
+				System.out.println("[" + getLecturePrefix(lectureCRN, fileName) + "/" + getLectureTitle(lectureCRN, fileName) + "]" + "[" + getLectureModality(lectureCRN, fileName) + "] Deleted");
+				for (Person a : people) {
+					if (a instanceof Faculty ) {
+						if (((Faculty) a).getLecturesTaught().contains(lectureCRN)) {
+							((Faculty) a).removeLecturesTaught(lectureCRN);
+						}
+					} else if(a instanceof TA) {
+						labs = getLab(lectureCRN, fileName);
+						for (String lab : labs) {
+							if (((TA) a).getLabsSupervised().contains(lab))
+								((TA) a).removeLabsSupervised(lab);
+						}
+					} else if(a instanceof Student){
+						if (((Student) a).getClassesTaken().contains(lectureCRN))
+							((Student) a).removeClassesTaken(lectureCRN);
+					}
+				}
+				deleteLecture(lectureCRN, fileName);
 			}
+//--------------------------------------Option 7-------------------------------------
 			if(intInput == 7) {
 				System.out.print("You have made a deletion of at least one lecture. Would you like to\r\n"
 						+ "print the copy of lec.txt? Enter y/Y for Yes or n/N for No: ");
 				stringInput = scanner.nextLine();
-				if(stringInput != "y" || stringInput != "n" || stringInput != "Y" || stringInput != "N") {
-					System.out.print("Is that a yes or no? Enter y/Y for Yes or n/N for No:");
-	
+				stringInput = scanner.nextLine();
+				while (true) {
+					if(!(stringInput.equalsIgnoreCase("y") || stringInput.equalsIgnoreCase("n"))) {
+						System.out.print("Is that a yes or no? Enter y/Y for Yes or n/N for No:");
+						stringInput = scanner.nextLine();
+					}else {
+						break;
+					}
 				}
-				else {
+				if (stringInput.equalsIgnoreCase("y")) {
+					Path filePath = Paths.get(fileName);
+					try {
+						List<String> fileContent = new ArrayList<>(Files.readAllLines(filePath));
+						System.out.println(fileContent);
+						System.out.println("Bye!");
+						break;
+					}catch(IOException e) {
+						System.err.println("Error reading files " + e.getMessage());
+					}
+				}else {
 					System.out.println("Bye!");
 					//add terminating thing here
 					break;
 				}
-				
 			}
-			
-			
-			
 		}
 		scanner.close();
 	}
@@ -807,6 +872,9 @@ class Student extends Person{
 	public void addClassesTaken(String classTaken) {
 		this.classesTaken.add(classTaken);
 	}
+	public void removeClassesTaken(String classTaken) {
+		this.classesTaken.remove(classTaken);
+	}
 	@Override
 	public String toString() {
 		return "Student [type=" + type + ", classesTaken=" + classesTaken.toString() + ", getName()=" + getName()
@@ -836,6 +904,9 @@ class TA extends Student{
 	}
 	public void addLabsSupervised(String labsSupervised) {
 		this.labsSupervised.add(labsSupervised);
+	}
+	public void removeLabsSupervised(String lab) {
+		this.labsSupervised.remove(lab);
 	}
 	public String getAdvisor() {
 		return advisor;
@@ -888,6 +959,9 @@ class Faculty extends Person{
 	}
 	public void addLecturesTaught(String lecture) {
 		this.lecturesTaught.add(lecture);
+	}
+	public void removeLecturesTaught(String lecture) {
+		this.lecturesTaught.remove(lecture);
 	}
 	@Override
 	public String toString() {
