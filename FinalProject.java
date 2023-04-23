@@ -2,6 +2,7 @@
 - COP 3330 Final Project.
 - Logan McBride, Lily Yarbrough
 - (optional) Add anything that you would like the TA to be aware of
+- C:\Users\Logan\eclipse-workspace\Java Final Project\lec.txt
 */
 import java.io.*;
 import java.util.*;
@@ -105,6 +106,18 @@ public class FinalProject {
 		fileInput.close();
 		return room;
 	}
+	static boolean hasLab(String CRN, String fileName) throws IOException{
+		String line;
+		BufferedReader fileInput = new BufferedReader(new FileReader(fileName));
+		while ((line = fileInput.readLine()) != null) {		
+				//System.out.println(line);
+	            String[] parts = line.split(",");
+		        if (parts.length > 5 && parts[0].equalsIgnoreCase(CRN) && parts[6].equalsIgnoreCase("yes"))
+		           return true;
+		}
+		fileInput.close();
+		return false;
+	}
 	static List<String> getLab(String CRN, String fileName) throws IOException{
 		List<String> labCRN = new ArrayList<>();
 		List<String> labs = new ArrayList<>();
@@ -115,7 +128,7 @@ public class FinalProject {
 		while ((line = fileInput.readLine()) != null) {		
 				//System.out.println(line);
 	            String[] parts = line.split(",");
-		        if (parts.length > 2 && parts[0].equalsIgnoreCase(CRN) && parts[6].equalsIgnoreCase("yes"))
+		        if (parts.length > 5 && parts[0].equalsIgnoreCase(CRN) && parts[6].equalsIgnoreCase("yes"))
 		           readingLabs = true;
 		        else if(parts.length == 2 && readingLabs == true)
 		        	labCRN.add(parts[0]);
@@ -155,19 +168,64 @@ public class FinalProject {
 		for (Person person : people) {
 			if(person instanceof Student && person.getId().equals(id)) {
 				Student temp = (Student) person;
-				String[] classesTaken = temp.getClassesTaken();
-				for (String a : classesTaken) {
-					if (a.equals(lab))
-						return true;
+				List<String> classesTaken = temp.getClassesTaken();
+				if (Objects.equals(classesTaken, null))
+					return false;
+				else {
+					for (String a : classesTaken) {
+						if (a.equals(lab))
+							return true;
+					}
 				}
 			}
 	    }
 		return false;
 	}
+	static boolean checkIfTA(ArrayList<Person> people, String id, String lecture) {
+		for (Person person : people) {
+			if(person instanceof TA && person.getId().equals(id)) {
+				TA temp = (TA) person;
+				List<String> classesTaken = temp.getClassesTaken();
+				if (Objects.equals(classesTaken, null))
+					return false;
+				else {
+					for (String a : classesTaken) {
+						if (a.equals(lecture))
+							return true;
+					}
+				}
+			}
+	    }
+		return false;
+	}
+	static boolean checkIfLectureIsAssigned(ArrayList<Person> people, String CRN) {
+		for (Person person : people) {
+			if (person instanceof Faculty) {
+				Faculty temp = (Faculty) person;
+				for (String a : temp.getLecturesTaught()) {
+					if (a.equalsIgnoreCase(CRN)){
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+	static String findName(ArrayList<Person> people, String ID) {
+		for (Person person : people) {
+			if (person.getId().equals(ID)) {
+				return person.getName();
+			}else {
+				return null;
+			}
+		}
+		return null;
+	}
+//--------------------------------------Main------------------------------------------------
 	public static void main(String[] args) throws IOException{
 		ArrayList<Person> people = new ArrayList();
 		
-		String ucfID;
+		String ucfID = null;
 		String name;
 		String rank;
 		String officeLocation;
@@ -177,7 +235,7 @@ public class FinalProject {
 		String fileName;
 		String line;
 		List<String> labs = new ArrayList<>();
-		List<String> lecturesArrayList = new ArrayList<>();
+		
 		
 		Scanner scanner = new Scanner(System.in);
 		int intInput;
@@ -199,7 +257,7 @@ public class FinalProject {
 			//printAllPeople(people);
 			mainMenu(); //calls method
 			intInput = scanner.nextInt();
-			
+//----------------------------------Option 1---------------------------------//
 			if(intInput == 1) {
 				
 				while(true) {
@@ -241,26 +299,38 @@ public class FinalProject {
 					System.out.println("Enter the crns of the lectures separated by ,: ");
 					lectureCRN = scanner.next();
 					lecturesArray = lectureCRN.split(",");
+					//------------This code will remove any lectures that are already assigned-----------
+					//String[] lecturesArrayNew = null;
+					for (String a : lecturesArray) {
+						if (checkIfLectureIsAssigned(people, a) == true) {
+							System.out.println("Sorry, " + a + " is already assigned");
+							//elementToRemove = a;
+						}
+
+					}
+						
+					//-------------------------------------------------------------------------------
 					for (String a : lecturesArray) {
 						labs = getLab(a, fileName);
-						if (!labs.equals(null)) {
-							System.out.println(a + "has these labs:");	
+						if (!labs.isEmpty()) {
+							System.out.println("[" + a + "/" + getLecturePrefix(a, fileName) + "/" + getLectureTitle(a, fileName) + "]" + " has these labs:");	
 							for (String b : labs) {
 								System.out.println(b);
 							}
 							for (String b : labs) {
+								String ucfID2;
 								String[] parts = b.split(",");
 								while (true) {
 									System.out.println("Enter the TA's id for " + parts[0]);
-									ucfID = scanner.nextLine();
-									if (checkIdFormat(ucfID) == true)
+									ucfID2 = scanner.next();
+									if (checkIdFormat(ucfID2) == true)
 										break;
 								}
-									if (checkExists(people, ucfID) == true) {
-										if (checkIfStudent(people, ucfID, b) == false) {
+									if (checkExists(people, ucfID2) == true) {
+										if (checkIfStudent(people, ucfID2, b) == false) {
 											TA taToUpdate = null;
 											for (Person person : people) {
-												if(person instanceof TA && person.getId().equals(ucfID)) {
+												if(person instanceof TA && person.getId().equals(ucfID2)) {
 													taToUpdate = (TA) person;
 													taToUpdate.addLabsSupervised(b);
 												}
@@ -268,17 +338,39 @@ public class FinalProject {
 										}else {
 											System.out.println("Sorry, The TA that you entered was found to be a student taking that lecture.");
 										}
-									}else if(checkExists(people, ucfID) == false){
-										if (checkIfStudent(people, ucfID, b) == false) {
+									}else if(checkExists(people, ucfID2) == false){
+										if (checkIfStudent(people, ucfID2, b) == false) {
 											//Call Lily's method to add a faculty with this ID
+											System.out.print("Name of TA: "); //asking for TA name
+											name = scanner.nextLine();
+											name = scanner.nextLine();
+											System.out.print("TA’s supervisor’s name: "); //asks for super. name
+											String supervisorName = scanner.nextLine();
+											String expectedDegree = "";
+											while(true) {
+												System.out.print("Degree seeking: ");
+												expectedDegree = scanner.next();
+												if(!(expectedDegree.equalsIgnoreCase("ms")  || expectedDegree.equalsIgnoreCase("phd") )) { //checks if not ms or phd
+													System.out.println("Sorry, this is not a valid degree, please try again.\n"); //lets them try again
+												}
+												else {
+													break; //leaves the while-true
+												}
+											}
+											TA ta = new TA(name,ucfID2,"graduate",null,null,supervisorName,expectedDegree);
+											ta.addLabsSupervised(b);
+											people.add(ta);
+											System.out.println("[" + a + "/" + getLecturePrefix(a, fileName) + "/" + getLectureTitle(a, fileName) + "]" + " Added!");
 										}else {
 											System.out.println("Sorry, The TA that you entered was found to be a student taking that lecture.");
 										}
 									}
 							}
+						} else {
+							System.out.println("[" + a + "/" + getLecturePrefix(a, fileName) + "/" + getLectureTitle(a, fileName) + "]" + " Added!");
 						}
 					}
-					lecturesArrayList = null;
+					List<String> lecturesArrayList = new ArrayList<>();
 					for (String a : lecturesArray) {
 						lecturesArrayList.add(a);
 					}
@@ -286,41 +378,210 @@ public class FinalProject {
 					people.add(faculty);
 
 				}else {
-					Faculty facultyToUpdate = null;
-					for (Person person : people) {
-						if(person instanceof Faculty && person.getId().equals(ucfID)) {
-							System.out.println("Enter how many lectures: ");
-							lectures = scanner.nextLine();
-							lectures = scanner.nextLine();
-							System.out.println("Enter the crns of the lectures: ");
-							lectureCRN = scanner.nextLine();
-							lecturesArray = lectureCRN.split(",");
-							lecturesArrayList = null;
-							for (String a : lecturesArray) {
-								facultyToUpdate.addLecturesTaught(a);
-							}
-							facultyToUpdate = (Faculty) person;
-							//facultyToUpdate.setLecturesTaught(lecturesArray);
+					System.out.println("Enter how many lectures: ");
+					lectures = scanner.next();
+						
+					System.out.println("Enter the crns of the lectures separated by ,: ");
+					lectureCRN = scanner.next();
+					lecturesArray = lectureCRN.split(",");
+					//------------This code will remove any lectures that are already assigned-----------
+					//String[] lecturesArrayNew = null;
+					for (String a : lecturesArray) {
+						if (checkIfLectureIsAssigned(people, a) == true) {
+							System.out.println("Sorry, " + a + " is already assigned");
+							//elementToRemove = a;
 						}
 					}
+					//-------------------------------------------------------------------------------
+					for (String a : lecturesArray) {
+						labs = getLab(a, fileName);
+						if (!labs.isEmpty()) {
+							System.out.println("[" + a + "/" + getLecturePrefix(a, fileName) + "/" + getLectureTitle(a, fileName) + "]" + " has these labs:");	
+							for (String b : labs) {
+								System.out.println(b);
+							}
+							for (String b : labs) {
+								String[] parts = b.split(",");
+								String ucfID2;
+								while (true) {
+									System.out.println("Enter the TA's id for " + parts[0]);
+									ucfID2 = scanner.next();
+									if (checkIdFormat(ucfID2) == true)
+										break;
+								}
+									if (checkExists(people, ucfID2) == true) {
+										if (checkIfStudent(people, ucfID2, b) == false) {
+											TA taToUpdate = null;
+											for (Person person : people) {
+												if(person instanceof TA && person.getId().equals(ucfID2)) {
+													taToUpdate = (TA) person;
+													taToUpdate.addLabsSupervised(b);
+												}
+											}
+										}else {
+											System.out.println("Sorry, The TA that you entered was found to be a student taking that lecture.");
+										}
+									}else if(checkExists(people, ucfID2) == false){
+										if (checkIfStudent(people, ucfID2, b) == false) {
+											//Call Lily's method to add a faculty with this ID
+											System.out.print("Name of TA: "); //asking for TA name
+											name = scanner.nextLine();
+											name = scanner.nextLine();
+											System.out.print("TA’s supervisor’s name: "); //asks for super. name
+											String supervisorName = scanner.nextLine();
+											String expectedDegree = "";
+											while(true) {
+												System.out.print("Degree seeking: ");
+												expectedDegree = scanner.next();
+												if(!(expectedDegree.equalsIgnoreCase("ms")  || expectedDegree.equalsIgnoreCase("phd") )) { //checks if not ms or phd
+													System.out.println("Sorry, this is not a valid degree, please try again.\n"); //lets them try again
+												}
+												else {
+													break; //leaves the while-true
+												}
+											}
+											TA ta = new TA(name,ucfID2,"graduate",null,null,supervisorName,expectedDegree);
+											ta.addLabsSupervised(b);
+											people.add(ta);
+											System.out.println("[" + a + "/" + getLecturePrefix(a, fileName) + "/" + getLectureTitle(a, fileName) + "]" + " Added!");
+										}else {
+											System.out.println("Sorry, The TA that you entered was found to be a student taking that lecture.");
+										}
+									}
+							}
+						} else {
+							System.out.println("[" + a + "/" + getLecturePrefix(a, fileName) + "/" + getLectureTitle(a, fileName) + "]" + " Added!");
+						}
+						for (Person b : people) {
+							Faculty temp = (Faculty) b;
+							if (b.getId().equalsIgnoreCase(ucfID)) {
+								temp.addLecturesTaught(a);
+							}
+						}
+					}			
+					
 				}
 			}
+//------------------------------------Option 2-------------------------------------------
 			if(intInput == 2) {
-				System.out.print("Enter UCF id: ");
-				stringInput = scanner.nextLine();
-				
-				System.out.print("Record found/Name: (enter the person's name here)"); //*****needs the name printed******
-				
-				System.out.print("Which lecture to enroll [] in?"); //*****needs the name printed in the brackets******
-				
-				//[COP5690/Programming Languages II] has these labs:
-					//19005,MSB-103
-					//30008,PSY-107
-					//20300,HSA1-16
-				
-				//[Erick Johann] is added to lab : 30008
-				
-				System.out.println("Student Enrolled!");
+				while(true) {
+					System.out.println("Enter UCF id: ");
+					stringInput = scanner.next();
+					try{
+						if(stringInput.length() != 7 || checkNumeric(stringInput) == false) {
+							throw new IdException();
+						}else {
+							ucfID = stringInput;
+							break;
+						}
+					}catch(IdException e){
+						e.getStackTrace();
+						System.out.println(e.getMessage());
+					}
+				}
+				if (checkExists(people, ucfID) == true) {
+					System.out.println("Record found/Name: " + findName(people, ucfID));
+					System.out.println("Which lecture to enroll [" + findName(people, ucfID) + "] in?");
+					lectureCRN = scanner.nextLine();
+					lectureCRN = scanner.nextLine();
+					if (checkIfTA(people, ucfID, lectureCRN) == false) {
+						if (hasLab(lectureCRN, fileName) == true) {
+							System.out.println("[" + getLecturePrefix(lectureCRN, fileName) + "/" + getLectureTitle(lectureCRN, fileName) + "] has these labs:");
+							labs = getLab(lectureCRN, fileName);
+							String[] labArray = new String[labs.size()];
+							int i;
+							for (String lab : labs) {
+								i = 0; 
+								System.out.println(lab);
+								labArray[i] = lab;
+							}
+							
+							/*for (int i = 0; i <= labs.size(); i++) {
+								labArray[i] = labs.get(i);
+							}*/
+							Random random = new Random();
+							int randomInt = random.nextInt(labs.size()-1);
+							String labAssigned = labArray[randomInt];
+							System.out.println("[" + findName(people, ucfID) + "] is added to lab : " + labAssigned);
+							System.out.println("Student enrolled!");
+							Student studentToUpdate;
+							for (Person a : people) {
+								studentToUpdate = (Student) a;
+								if (a instanceof Student && a.getId().equals(ucfID)) {
+									studentToUpdate.addClassesTaken(lectureCRN);
+									studentToUpdate.addClassesTaken(labAssigned);
+								}
+							}
+						} else {
+							Student studentToUpdate;
+							for (Person a : people) {
+								System.out.println("Student enrolled!");
+								studentToUpdate = (Student) a;
+								if (a instanceof Student && a.getId().equals(ucfID)) {
+									studentToUpdate.addClassesTaken(lectureCRN);
+								}
+							}
+						}
+					} else {
+						System.out.println("Sorry, this person is already a TA for this class");
+					}
+				} else {
+					System.out.print("Record not found. Enter Name: ");
+					name = scanner.nextLine();
+					name = scanner.nextLine();
+					String type;
+					while (true) {
+						System.out.print("Enter Student Type (Undergraduate/Graduate): ");
+						type = scanner.next();
+						if ((type.equalsIgnoreCase("undergraduate") || type.equalsIgnoreCase("graduate"))) {
+							break;
+						} else {
+							System.out.println("Sorry, Please try again");
+						}
+					}
+					Student student = new Student(name, ucfID, type, null);
+					people.add(student);
+					System.out.print("Which lecture to enroll [" + name + "] in?");
+					lectureCRN = scanner.nextLine();
+					lectureCRN = scanner.nextLine();
+					if (checkIfTA(people, ucfID, lectureCRN) == false) {
+						if (hasLab(lectureCRN, fileName) == true) {
+							System.out.println("[" + getLecturePrefix(lectureCRN, fileName) + "/" + getLectureTitle(lectureCRN, fileName) + "] has these labs:");
+							labs = getLab(lectureCRN, fileName);
+							String[] labArray = new String[labs.size()];
+							int i;
+							for (String lab : labs) {
+								i = 0; 
+								System.out.println(lab);
+								labArray[i] = lab;
+							}
+							Random random = new Random();
+							int randomInt = random.nextInt(labs.size()-1);
+							String labAssigned = labArray[randomInt];
+							System.out.println("[" + name + "] is added to lab : " + labAssigned);
+							System.out.println("Student enrolled!");
+							Student studentToUpdate;
+							for (Person a : people) {
+								studentToUpdate = (Student) a;
+								if (a instanceof Student && a.getId().equals(ucfID)) {
+									studentToUpdate.addClassesTaken(lectureCRN);
+									studentToUpdate.addClassesTaken(labAssigned);
+								}
+							}
+						} else {
+							Student studentToUpdate;
+							for (Person a : people) {
+								System.out.println("Student enrolled!");
+								studentToUpdate = (Student) a;
+								if (a instanceof Student && a.getId().equals(ucfID)) {
+									studentToUpdate.addClassesTaken(lectureCRN);
+								}
+							}
+						}
+					} else {
+						System.out.println("Sorry, this person is already a TA for this class");
+					}
+				}
 			}
 			if(intInput == 3) {
 				System.out.print("Enter the UCF id: ");
@@ -416,11 +677,15 @@ abstract class Person{
 
 class Student extends Person{
 	private String type;
-	private String[] classesTaken;
-	public Student(String name, String id, String type, String[] classesTaken) {
+	private List<String> classesTaken = new ArrayList<>();
+	public Student(String name, String id, String type, List<String> classesTaken) {
 		super(name, id);
 		this.type = type;
-		this.classesTaken = classesTaken;
+		if (classesTaken == null) {
+		    this.classesTaken = new ArrayList<String>();
+		} else {
+		    this.classesTaken = classesTaken;
+		}
 	}
 	public String getType() {
 		return type;
@@ -428,26 +693,33 @@ class Student extends Person{
 	public void setType(String type) {
 		this.type = type;
 	}
-	public String[] getClassesTaken() {
+	public List<String> getClassesTaken() {
 		return classesTaken;
 	}
-	public void setClassesTaken(String[] classesTaken) {
+	public void setClassesTaken(List<String> classesTaken) {
 		this.classesTaken = classesTaken;
+	}
+	public void addClassesTaken(String classTaken) {
+		this.classesTaken.add(classTaken);
 	}
 	@Override
 	public String toString() {
-		return "Student [type=" + type + ", classesTaken=" + Arrays.toString(classesTaken) + ", getName()=" + getName()
+		return "Student [type=" + type + ", classesTaken=" + classesTaken.toString() + ", getName()=" + getName()
 				+ ", getId()=" + getId() + "]";
 	}
 	
 }
 
 class TA extends Student{
-	private List<String> labsSupervised;
+	private List<String> labsSupervised = new ArrayList<String>();
 	private String advisor, expectedDegree;
-	public TA(String name, String id, String type, String[] classesTaken, List<String> labsSupervised, String advisor, String expectedDegree) {
+	public TA(String name, String id, String type, List<String> classesTaken, List<String> labsSupervised, String advisor, String expectedDegree) {
 		super(name, id, type, classesTaken);
-		this.labsSupervised = labsSupervised;
+		if (labsSupervised == null) {
+		    this.labsSupervised = new ArrayList<String>();
+		} else {
+		    this.labsSupervised = labsSupervised;
+		}
 		this.advisor = advisor;
 		this.expectedDegree = expectedDegree;
 	}
@@ -476,7 +748,7 @@ class TA extends Student{
 	public String toString() {
 		return "TA [labsSupervised=" + (labsSupervised.toString()) + ", advisor=" + advisor + ", expectedDegree="
 				+ expectedDegree + ", getType()=" + getType() + ", getClassesTaken()="
-				+ Arrays.toString(getClassesTaken()) + ", getName()=" + getName() + ", getId()=" + getId() + "]";
+				+ getClassesTaken().toString() + ", getName()=" + getName() + ", getId()=" + getId() + "]";
 	}
 	
 	
@@ -484,7 +756,7 @@ class TA extends Student{
 
 class Faculty extends Person{
 	private String rank, officeLocation;
-	List<String> lecturesTaught;
+	List<String> lecturesTaught = new ArrayList<String>();
 	public Faculty(String ID, String name, String rank, List<String> lecturesTaught, String officeLocation) {
 		super(name, ID);
 		this.rank = rank;
