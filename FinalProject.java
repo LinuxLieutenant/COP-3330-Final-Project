@@ -51,7 +51,7 @@ public class FinalProject {
 		BufferedReader fileInput = new BufferedReader(new FileReader(fileName));
 		while ((line = fileInput.readLine()) != null) {						
 	            String[] parts = line.split(",");
-	            if (line.length() > 2 && parts[0].equalsIgnoreCase(CRN)) {
+	            if (parts.length > 2 && parts[0].equalsIgnoreCase(CRN)) {
 	            	prefix = parts[1];
 	            }
 		}
@@ -64,7 +64,7 @@ public class FinalProject {
 		BufferedReader fileInput = new BufferedReader(new FileReader(fileName));
 		while ((line = fileInput.readLine()) != null) {						
 	            String[] parts = line.split(",");
-	            if (line.length() > 2 && parts[0].equalsIgnoreCase(CRN)) {
+	            if (parts.length > 2 && parts[0].equalsIgnoreCase(CRN)) {
 	            	title = parts[2];
 	            }
 		}
@@ -77,7 +77,7 @@ public class FinalProject {
 		BufferedReader fileInput = new BufferedReader(new FileReader(fileName));
 		while ((line = fileInput.readLine()) != null) {						
 	            String[] parts = line.split(",");
-	            if (line.length() > 2 && parts[0].equalsIgnoreCase(CRN)) {
+	            if (parts.length > 2 && parts[0].equalsIgnoreCase(CRN)) {
 	            	level = parts[3];
 	            }
 		}
@@ -90,7 +90,7 @@ public class FinalProject {
 		BufferedReader fileInput = new BufferedReader(new FileReader(fileName));
 		while ((line = fileInput.readLine()) != null) {						
 	            String[] parts = line.split(",");
-	            if (line.length() > 2 && parts[0].equalsIgnoreCase(CRN)) {
+	            if (parts.length > 2 && parts[0].equalsIgnoreCase(CRN)) {
 	            	modality = parts[4];
 	            }
 		}
@@ -103,7 +103,7 @@ public class FinalProject {
 		BufferedReader fileInput = new BufferedReader(new FileReader(fileName));
 		while ((line = fileInput.readLine()) != null) {						
 	            String[] parts = line.split(",");
-	            if (line.length() > 2 && parts[0].equalsIgnoreCase(CRN)) {
+	            if (parts.length > 2 && parts[0].equalsIgnoreCase(CRN)) {
 	            	room = parts[1];
 	            }
 		}
@@ -151,6 +151,20 @@ public class FinalProject {
 		}
 		
 		return labs;
+	}
+	static String getLabCRN(String lab, String fileName) throws IOException{
+		String labCRN = null;
+		String line;
+		BufferedReader fileInput = new BufferedReader(new FileReader(fileName));
+		while ((line = fileInput.readLine()) != null) {		
+	            String[] parts = line.split(",");
+		        if (line.equalsIgnoreCase(lab)) {
+		           labCRN = parts[0];
+		           break;
+		        }
+		}
+		fileInput.close();	
+		return labCRN;
 	}
 	static boolean checkNumeric(String ID) {
 		if (ID == null) {
@@ -219,8 +233,6 @@ public class FinalProject {
 		for (Person person : people) {
 			if (person.getId().equals(ID)) {
 				return person.getName();
-			}else {
-				return null;
 			}
 		}
 		return null;
@@ -263,18 +275,68 @@ public class FinalProject {
 	    Files.write(filePath, fileContent, StandardCharsets.UTF_8);
 	    fileInput.close();
 	}
-	/*static String getLectureInfo(String CRN, String fileName) throws IOException{
+	static String getLectureInfo(String CRN, String fileName) throws IOException{
 		String line;
+		String prefix;
+		String title;
+		String modality;
+		String type;
+		String location;
+		String info = null;
 		BufferedReader fileInput = new BufferedReader(new FileReader(fileName));
 		while ((line = fileInput.readLine()) != null) {						
 	            String[] parts = line.split(",");
-	            if (line.length() > 2 && parts[0].equalsIgnoreCase(CRN)) {
+	            if (parts.length > 2 && parts[0].equalsIgnoreCase(CRN)) {
+	            	prefix = parts[1];
 	            	title = parts[2];
+	            	type = parts[3];
+	            	modality = parts[4];
+	            	if(parts.length > 5) {
+	            		location = parts[5];
+	            		info = "[" + CRN + "/" + prefix + "/" + title + "/" + modality + "]";
+	            		return info;
+	            	} else {
+	            		info = "[" + CRN + "/" + prefix + "/" + title + "/" + modality + "]";
+	            		return info;
+	            	}
+	            	
+	            } else if(parts.length == 2 && parts[0].equalsIgnoreCase(CRN)){
+	            	prefix = parts[1];
+	            	info = "[" + CRN + "/" + prefix + "]";
+	            	return info;
 	            }
 		}
 		fileInput.close();
-		return title;
-	}*/
+		return info;
+	}
+	static boolean checkIfLabMatches(String labCRN, String lectureCRN, String fileName) throws IOException{
+		String line;
+		boolean readingLabs = false;
+		boolean isLab = false;
+		BufferedReader fileInput = new BufferedReader(new FileReader(fileName));
+	    while ((line = fileInput.readLine()) != null) {
+	        String[] parts = line.split(",");
+	        if (parts.length > 5 && parts[0].equalsIgnoreCase(lectureCRN) && parts[6].equalsIgnoreCase("yes")) {
+	            readingLabs = true;
+	            String labLine;
+	            while ((labLine = fileInput.readLine()) != null) {
+	               String[] labParts = labLine.split(",");
+	               if (labParts.length == 2 && labParts[0].equalsIgnoreCase(labCRN)) {
+	            	   isLab = true;
+	            	   return isLab;
+	               } else {
+	            	   readingLabs = false;
+	            	   isLab = false;
+	                   break;
+	               }
+	            }
+	        } else {
+	        	isLab = false;
+	        }
+	    }
+		
+		return isLab;
+	}
 //--------------------------------------Main------------------------------------------------
 	public static void main(String[] args) throws IOException{
 		ArrayList<Person> people = new ArrayList();
@@ -308,15 +370,15 @@ public class FinalProject {
 		}
 		//System.out.println(getLab("69745", fileName));
 		while (true){
-			//printAllPeople(people);
+			printAllPeople(people);
 			mainMenu(); //calls method
-			intInput = scanner.nextInt();
+			stringInput = scanner.nextLine();
 //----------------------------------Option 1---------------------------------//
-			if(intInput == 1) {
+			if(stringInput.equals("1")) {
 				
 				while(true) {
 					System.out.println("Enter UCF id: ");
-					stringInput = scanner.next();
+					stringInput = scanner.nextLine();
 					try{
 						if(stringInput.length() != 7 || checkNumeric(stringInput) == false) {
 							throw new IdException();
@@ -331,7 +393,6 @@ public class FinalProject {
 				}
 				if (checkExists(people, ucfID) == false) {
 					System.out.println("Enter name: ");
-					name = scanner.nextLine();
 					name = scanner.nextLine();
 					
 					while(true) {
@@ -348,10 +409,10 @@ public class FinalProject {
 					System.out.println("Enter office location: ");
 					officeLocation = scanner.nextLine();
 					System.out.println("Enter how many lectures: ");
-					lectures = scanner.next();
+					lectures = scanner.nextLine();
 						
 					System.out.println("Enter the crns of the lectures separated by ,: ");
-					lectureCRN = scanner.next();
+					lectureCRN = scanner.nextLine();
 					lecturesArray = lectureCRN.split(",");
 					//------------This code will remove any lectures that are already assigned-----------
 					//String[] lecturesArrayNew = null;
@@ -376,7 +437,7 @@ public class FinalProject {
 								String[] parts = b.split(",");
 								while (true) {
 									System.out.println("Enter the TA's id for " + parts[0]);
-									ucfID2 = scanner.next();
+									ucfID2 = scanner.nextLine();
 									if (checkIdFormat(ucfID2) == true)
 										break;
 								}
@@ -394,16 +455,15 @@ public class FinalProject {
 										}
 									}else if(checkExists(people, ucfID2) == false){
 										if (checkIfStudent(people, ucfID2, b) == false) {
-											//Call Lily's method to add a faculty with this ID
 											System.out.print("Name of TA: "); //asking for TA name
 											name = scanner.nextLine();
-											name = scanner.nextLine();
 											System.out.print("TA’s supervisor’s name: "); //asks for super. name
+											//scanner.nextLine();
 											String supervisorName = scanner.nextLine();
 											String expectedDegree = "";
 											while(true) {
 												System.out.print("Degree seeking: ");
-												expectedDegree = scanner.next();
+												expectedDegree = scanner.nextLine();
 												if(!(expectedDegree.equalsIgnoreCase("ms")  || expectedDegree.equalsIgnoreCase("phd") )) { //checks if not ms or phd
 													System.out.println("Sorry, this is not a valid degree, please try again.\n"); //lets them try again
 												}
@@ -414,12 +474,13 @@ public class FinalProject {
 											TA ta = new TA(name,ucfID2,"graduate",null,null,supervisorName,expectedDegree);
 											ta.addLabsSupervised(b);
 											people.add(ta);
-											System.out.println("[" + a + "/" + getLecturePrefix(a, fileName) + "/" + getLectureTitle(a, fileName) + "]" + " Added!");
+											//System.out.println("[" + a + "/" + getLecturePrefix(a, fileName) + "/" + getLectureTitle(a, fileName) + "]" + " Added!");
 										}else {
 											System.out.println("Sorry, The TA that you entered was found to be a student taking that lecture.");
 										}
 									}
 							}
+							System.out.println("[" + a + "/" + getLecturePrefix(a, fileName) + "/" + getLectureTitle(a, fileName) + "]" + " Added!");
 						} else {
 							System.out.println("[" + a + "/" + getLecturePrefix(a, fileName) + "/" + getLectureTitle(a, fileName) + "]" + " Added!");
 						}
@@ -433,10 +494,10 @@ public class FinalProject {
 
 				}else {
 					System.out.println("Enter how many lectures: ");
-					lectures = scanner.next();
+					lectures = scanner.nextLine();
 						
 					System.out.println("Enter the crns of the lectures separated by ,: ");
-					lectureCRN = scanner.next();
+					lectureCRN = scanner.nextLine();
 					lecturesArray = lectureCRN.split(",");
 					//------------This code will remove any lectures that are already assigned-----------
 					//String[] lecturesArrayNew = null;
@@ -459,7 +520,7 @@ public class FinalProject {
 								String ucfID2;
 								while (true) {
 									System.out.println("Enter the TA's id for " + parts[0]);
-									ucfID2 = scanner.next();
+									ucfID2 = scanner.nextLine();
 									if (checkIdFormat(ucfID2) == true)
 										break;
 								}
@@ -480,13 +541,13 @@ public class FinalProject {
 											//Call Lily's method to add a faculty with this ID
 											System.out.print("Name of TA: "); //asking for TA name
 											name = scanner.nextLine();
-											name = scanner.nextLine();
+											//name = scanner.nextLine();
 											System.out.print("TA’s supervisor’s name: "); //asks for super. name
 											String supervisorName = scanner.nextLine();
 											String expectedDegree = "";
 											while(true) {
 												System.out.print("Degree seeking: ");
-												expectedDegree = scanner.next();
+												expectedDegree = scanner.nextLine();
 												if(!(expectedDegree.equalsIgnoreCase("ms")  || expectedDegree.equalsIgnoreCase("phd") )) { //checks if not ms or phd
 													System.out.println("Sorry, this is not a valid degree, please try again.\n"); //lets them try again
 												}
@@ -517,10 +578,10 @@ public class FinalProject {
 				}
 			}
 //------------------------------------Option 2-------------------------------------------
-			if(intInput == 2) {
+			if(stringInput.equals("2")) {
 				while(true) {
 					System.out.println("Enter UCF id: ");
-					stringInput = scanner.next();
+					stringInput = scanner.nextLine();
 					try{
 						if(stringInput.length() != 7 || checkNumeric(stringInput) == false) {
 							throw new IdException();
@@ -537,22 +598,18 @@ public class FinalProject {
 					System.out.println("Record found/Name: " + findName(people, ucfID));
 					System.out.println("Which lecture to enroll [" + findName(people, ucfID) + "] in?");
 					lectureCRN = scanner.nextLine();
-					lectureCRN = scanner.nextLine();
+					//lectureCRN = scanner.nextLine();
 					if (checkIfTA(people, ucfID, lectureCRN) == false) {
 						if (hasLab(lectureCRN, fileName) == true) {
 							System.out.println("[" + getLecturePrefix(lectureCRN, fileName) + "/" + getLectureTitle(lectureCRN, fileName) + "] has these labs:");
 							labs = getLab(lectureCRN, fileName);
 							String[] labArray = new String[labs.size()];
-							int i;
+							int i = 0;
 							for (String lab : labs) {
-								i = 0; 
 								System.out.println(lab);
 								labArray[i] = lab;
+								i++;
 							}
-							
-							/*for (int i = 0; i <= labs.size(); i++) {
-								labArray[i] = labs.get(i);
-							}*/
 							Random random = new Random();
 							int randomInt = random.nextInt(labs.size()-1);
 							String labAssigned = labArray[randomInt];
@@ -560,18 +617,18 @@ public class FinalProject {
 							System.out.println("Student enrolled!");
 							Student studentToUpdate;
 							for (Person a : people) {
-								studentToUpdate = (Student) a;
 								if (a instanceof Student && a.getId().equals(ucfID)) {
+									studentToUpdate = (Student) a;
 									studentToUpdate.addClassesTaken(lectureCRN);
-									studentToUpdate.addClassesTaken(labAssigned);
+									studentToUpdate.addClassesTaken(getLabCRN(labAssigned, fileName));
 								}
 							}
 						} else {
 							Student studentToUpdate;
 							for (Person a : people) {
 								System.out.println("Student enrolled!");
-								studentToUpdate = (Student) a;
 								if (a instanceof Student && a.getId().equals(ucfID)) {
+									studentToUpdate = (Student) a;
 									studentToUpdate.addClassesTaken(lectureCRN);
 								}
 							}
@@ -582,11 +639,11 @@ public class FinalProject {
 				} else {
 					System.out.print("Record not found. Enter Name: ");
 					name = scanner.nextLine();
-					name = scanner.nextLine();
+					//name = scanner.nextLine();
 					String type;
 					while (true) {
 						System.out.print("Enter Student Type (Undergraduate/Graduate): ");
-						type = scanner.next();
+						type = scanner.nextLine();
 						if ((type.equalsIgnoreCase("undergraduate") || type.equalsIgnoreCase("graduate"))) {
 							break;
 						} else {
@@ -597,7 +654,7 @@ public class FinalProject {
 					people.add(student);
 					System.out.print("Which lecture to enroll [" + name + "] in?");
 					lectureCRN = scanner.nextLine();
-					lectureCRN = scanner.nextLine();
+					//lectureCRN = scanner.nextLine();
 					if (checkIfTA(people, ucfID, lectureCRN) == false) {
 						if (hasLab(lectureCRN, fileName) == true) {
 							System.out.println("[" + getLecturePrefix(lectureCRN, fileName) + "/" + getLectureTitle(lectureCRN, fileName) + "] has these labs:");
@@ -616,18 +673,18 @@ public class FinalProject {
 							System.out.println("Student enrolled!");
 							Student studentToUpdate;
 							for (Person a : people) {
-								studentToUpdate = (Student) a;
 								if (a instanceof Student && a.getId().equals(ucfID)) {
+									studentToUpdate = (Student) a;
 									studentToUpdate.addClassesTaken(lectureCRN);
-									studentToUpdate.addClassesTaken(labAssigned);
+									studentToUpdate.addClassesTaken(getLabCRN(labAssigned, fileName));
 								}
 							}
 						} else {
 							Student studentToUpdate;
 							for (Person a : people) {
 								System.out.println("Student enrolled!");
-								studentToUpdate = (Student) a;
 								if (a instanceof Student && a.getId().equals(ucfID)) {
+									studentToUpdate = (Student) a;
 									studentToUpdate.addClassesTaken(lectureCRN);
 								}
 							}
@@ -638,10 +695,10 @@ public class FinalProject {
 				}
 			}
 //-------------------------------------Option 3-----------------------------------------
-			if(intInput == 3) {
+			if(stringInput.equals("3")) {
 				while(true) {
 					System.out.println("Enter UCF id: ");
-					stringInput = scanner.next();
+					stringInput = scanner.nextLine();
 					try{
 						if(stringInput.length() != 7 || checkNumeric(stringInput) == false) {
 							throw new IdException();
@@ -680,10 +737,10 @@ public class FinalProject {
 				}				
 			}
 //---------------------------------Option 4---------------------------------------------------
-			if(intInput == 4) {
+			if(stringInput.equals("5")) {
 				while(true) {
 					System.out.println("Enter UCF id: ");
-					stringInput = scanner.next();
+					stringInput = scanner.nextLine();
 					try{
 						if(stringInput.length() != 7 || checkNumeric(stringInput) == false) {
 							throw new IdException();
@@ -697,7 +754,7 @@ public class FinalProject {
 					}
 				}
 				if (checkExists(people, ucfID) == true) {
-					System.out.println(findName(people, ucfID) + "is teaching the following lectures:");
+					System.out.println(findName(people, ucfID) + "is teaching the following labs:");
 					TA taToPrint = null;
 					List<String> labsSupervised;
 					for(Person person : people) {
@@ -716,10 +773,10 @@ public class FinalProject {
 				}				
 			}
 //--------------------------------Option 5--------------------------------------------
-			if(intInput == 5) {
+			if(stringInput.equals("5")) {
 				while(true) {
 					System.out.println("Enter student UCF id: ");
-					stringInput = scanner.next();
+					stringInput = scanner.nextLine();
 					try{
 						if(stringInput.length() != 7 || checkNumeric(stringInput) == false) {
 							throw new IdException();
@@ -734,7 +791,7 @@ public class FinalProject {
 				}
 				if (checkExists(people, ucfID) == true) {
 					System.out.println(findName(people, ucfID) + "is enrolled in the following lectures:");
-					Student studentToPrint = null;
+					Student studentToPrint;
 					List<String> classesTaken;
 					for(Person person : people) {
 						if(person instanceof Student && person.getId().equals(ucfID)) { 
@@ -742,8 +799,14 @@ public class FinalProject {
 							classesTaken = studentToPrint.getClassesTaken();
 							for (String classes : classesTaken) {
 								if (hasLab(classes, fileName) == true) {
-									System.out.println("[" + getLecturePrefix(classes, fileName) + "/" + getLectureTitle(classes, fileName) + "]" + "with Labs:");
-									labs = getLab(classes, fileName);
+									String labSection = null;
+									for (String labsTaken : classesTaken) {
+										if (checkIfLabMatches(labsTaken, classes, fileName) == true) {
+											labSection = labsTaken;
+										}
+									}
+									System.out.println("[" + getLecturePrefix(classes, fileName) + "/" + getLectureTitle(classes, fileName) + "]/[Lab: " + labSection + "]");
+									//labs = getLab(classes, fileName);
 									for (String lab : labs) {
 										System.out.println(lab);
 									}
@@ -758,10 +821,10 @@ public class FinalProject {
 				}
 			}
 //-----------------------------------------Option 6------------------------------------------------
-			if(intInput == 6) {
+			if(stringInput.equals("6")) {
 				System.out.print("Enter the crn of the lecture to delete: ");
 				lectureCRN = scanner.nextLine();
-				lectureCRN = scanner.nextLine();
+				//lectureCRN = scanner.nextLine();
 				System.out.println("[" + getLecturePrefix(lectureCRN, fileName) + "/" + getLectureTitle(lectureCRN, fileName) + "]" + "[" + getLectureModality(lectureCRN, fileName) + "] Deleted");
 				for (Person a : people) {
 					if (a instanceof Faculty ) {
@@ -782,11 +845,11 @@ public class FinalProject {
 				deleteLecture(lectureCRN, fileName);
 			}
 //--------------------------------------Option 7-------------------------------------
-			if(intInput == 7) {
+			if(stringInput.equals("7")) {
 				System.out.print("You have made a deletion of at least one lecture. Would you like to\r\n"
 						+ "print the copy of lec.txt? Enter y/Y for Yes or n/N for No: ");
 				stringInput = scanner.nextLine();
-				stringInput = scanner.nextLine();
+				//stringInput = scanner.nextLine();
 				while (true) {
 					if(!(stringInput.equalsIgnoreCase("y") || stringInput.equalsIgnoreCase("n"))) {
 						System.out.print("Is that a yes or no? Enter y/Y for Yes or n/N for No:");
@@ -810,6 +873,8 @@ public class FinalProject {
 					//add terminating thing here
 					break;
 				}
+			} else {
+				System.out.println("Please Try Again");
 			}
 		}
 		scanner.close();
