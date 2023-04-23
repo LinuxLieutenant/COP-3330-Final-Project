@@ -221,6 +221,18 @@ public class FinalProject {
 		}
 		return null;
 	}
+	/*static String getLectureInfo(String CRN, String fileName) throws IOException{
+		String line;
+		BufferedReader fileInput = new BufferedReader(new FileReader(fileName));
+		while ((line = fileInput.readLine()) != null) {						
+	            String[] parts = line.split(",");
+	            if (line.length() > 2 && parts[0].equalsIgnoreCase(CRN)) {
+	            	title = parts[2];
+	            }
+		}
+		fileInput.close();
+		return title;
+	}*/
 //--------------------------------------Main------------------------------------------------
 	public static void main(String[] args) throws IOException{
 		ArrayList<Person> people = new ArrayList();
@@ -583,34 +595,127 @@ public class FinalProject {
 					}
 				}
 			}
+//-------------------------------------Option 3-----------------------------------------
 			if(intInput == 3) {
-				System.out.print("Enter the UCF id: ");
-				ucfID = scanner.nextLine();
-				Faculty facultyToPrint = null;
-				for(Person person : people) {
-					if(person instanceof Faculty && person.getId().equals(ucfID)) { 
-						facultyToPrint = (Faculty) person;
-						System.out.print(facultyToPrint.getId());
-						System.out.print("\n[insert name] is teaching the following lectures:"); //come back to later
-						System.out.print("\n["  );
-						
+				while(true) {
+					System.out.println("Enter UCF id: ");
+					stringInput = scanner.next();
+					try{
+						if(stringInput.length() != 7 || checkNumeric(stringInput) == false) {
+							throw new IdException();
+						}else {
+							ucfID = stringInput;
+							break;
+						}
+					}catch(IdException e){
+						e.getStackTrace();
+						System.out.println(e.getMessage());
 					}
 				}
-				
+				if (checkExists(people, ucfID) == true) {
+					System.out.println(findName(people, ucfID) + "is teaching the following lectures:");
+					Faculty facultyToPrint = null;
+					List<String> lecturesTaught;
+					for(Person person : people) {
+						if(person instanceof Faculty && person.getId().equals(ucfID)) { 
+							facultyToPrint = (Faculty) person;
+							lecturesTaught = facultyToPrint.getLecturesTaught();
+							for (String lecture : lecturesTaught) {
+								if (hasLab(lecture, fileName) == true) {
+									System.out.println("[" + getLecturePrefix(lecture, fileName) + "/" + getLectureTitle(lecture, fileName) + "]" + "with Labs:");
+									labs = getLab(lecture, fileName);
+									for (String lab : labs) {
+										System.out.println(lab);
+									}
+								} else {
+									System.out.println("[" + getLecturePrefix(lecture, fileName) + "/" + getLectureTitle(lecture, fileName) + "]" + "[" + getLectureModality(lecture, fileName) + "]");
+								}
+							}
+						}
+					}
+				} else {
+					System.out.println("Sorry no Faculty found.");
+				}				
 			}
+//---------------------------------Option 4---------------------------------------------------
 			if(intInput == 4) {
-				System.out.println("Enter the TA's UCF id: ");
-				ucfID = scanner.nextLine();
-			//create if statement in while(true) loop that'll check if it exists, if not, it goes back to the menu	
+				while(true) {
+					System.out.println("Enter UCF id: ");
+					stringInput = scanner.next();
+					try{
+						if(stringInput.length() != 7 || checkNumeric(stringInput) == false) {
+							throw new IdException();
+						}else {
+							ucfID = stringInput;
+							break;
+						}
+					}catch(IdException e){
+						e.getStackTrace();
+						System.out.println(e.getMessage());
+					}
+				}
+				if (checkExists(people, ucfID) == true) {
+					System.out.println(findName(people, ucfID) + "is teaching the following lectures:");
+					TA taToPrint = null;
+					List<String> labsSupervised;
+					for(Person person : people) {
+						if(person instanceof Student && person.getId().equals(ucfID)) { 
+							taToPrint = (TA) person;
+							labsSupervised = taToPrint.getLabsSupervised();
+							
+							
+							for (String lab : labsSupervised) {
+								System.out.println(lab);
+							}
+						}
+					}
+				} else {
+					System.out.println("Sorry no TA found.");
+				}				
 			}
+//--------------------------------Option 5--------------------------------------------
 			if(intInput == 5) {
-				System.out.print("Enter the UCF id: ");
-				//if/else statement that checks if person exists
-				System.out.println("Record found:");
-				//prints full name
-				System.out.println("Enrolled in the following lectures:\n");
-				//prints out the lectures in this format: [COP5690/Programming Languages II]/[Lab: 30008]
+				while(true) {
+					System.out.println("Enter student UCF id: ");
+					stringInput = scanner.next();
+					try{
+						if(stringInput.length() != 7 || checkNumeric(stringInput) == false) {
+							throw new IdException();
+						}else {
+							ucfID = stringInput;
+							break;
+						}
+					}catch(IdException e){
+						e.getStackTrace();
+						System.out.println(e.getMessage());
+					}
+				}
+				if (checkExists(people, ucfID) == true) {
+					System.out.println(findName(people, ucfID) + "is enrolled in the following lectures:");
+					Student studentToPrint = null;
+					List<String> classesTaken;
+					for(Person person : people) {
+						if(person instanceof Student && person.getId().equals(ucfID)) { 
+							studentToPrint = (Student) person;
+							classesTaken = studentToPrint.getClassesTaken();
+							for (String classes : classesTaken) {
+								if (hasLab(classes, fileName) == true) {
+									System.out.println("[" + getLecturePrefix(classes, fileName) + "/" + getLectureTitle(classes, fileName) + "]" + "with Labs:");
+									labs = getLab(classes, fileName);
+									for (String lab : labs) {
+										System.out.println(lab);
+									}
+								} else {
+									System.out.println("[" + getLecturePrefix(classes, fileName) + "/" + getLectureTitle(classes, fileName) + "]" + "[" + getLectureModality(classes, fileName) + "]");
+								}
+							}
+						}
+					}
+				} else {
+					System.out.println("Sorry no Student found.");
+				}
 			}
+//
 			if(intInput == 6) {
 				System.out.print("Enter the crn of the lecture to delete: ");
 				stringInput = scanner.nextLine();
@@ -788,7 +893,5 @@ class Faculty extends Person{
 	public String toString() {
 		return "Faculty [ID =" + getId() + "name =" + getName() + "rank=" + rank + ", officeLocation=" + officeLocation + ", lecturesTaught="
 				+ lecturesTaught.toString() + "]";
-	}
-	
-	
+	}	
 }
