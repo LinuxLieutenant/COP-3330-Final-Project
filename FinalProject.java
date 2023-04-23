@@ -854,27 +854,31 @@ public class FinalProject {
 					}
 				}
 				if (checkExists(people, ucfID) == true) {
-					System.out.println(findName(people, ucfID) + " is enrolled in the following lectures:");
-					Student studentToPrint;
-					List<String> classesTaken;
-					for(Person person : people) {
-						if(person instanceof Student && person.getId().equals(ucfID)) { 
-							studentToPrint = (Student) person;
-							classesTaken = studentToPrint.getClassesTaken();
-							String labSection = "";
-							for (String classes : classesTaken) {
-								if (hasLab(classes, fileName) == true) {
-									for (String labsTaken : classesTaken) {
-										if (checkIfLabMatches(labsTaken, classes, fileName) == true) {
-											labSection = labsTaken;
+					if (isFaculty(people, ucfID) == false) {
+						System.out.println(findName(people, ucfID) + " is enrolled in the following lectures:");
+						Student studentToPrint;
+						List<String> classesTaken;
+						for(Person person : people) {
+							if(person instanceof Student && person.getId().equals(ucfID)) { 
+								studentToPrint = (Student) person;
+								classesTaken = studentToPrint.getClassesTaken();
+								String labSection = "";
+								for (String classes : classesTaken) {
+									if (hasLab(classes, fileName) == true) {
+										for (String labsTaken : classesTaken) {
+											if (checkIfLabMatches(labsTaken, classes, fileName) == true) {
+												labSection = labsTaken;
+											}
 										}
+										System.out.println("[" + classes + "/" + getLecturePrefix(classes, fileName) + "/" + getLectureTitle(classes, fileName) + "]/[Lab: " + labSection + "]");
+									} else if (hasLab(classes, fileName) == false) {
+										System.out.println(getLectureInfo(classes, fileName));
 									}
-									System.out.println("[" + classes + "/" + getLecturePrefix(classes, fileName) + "/" + getLectureTitle(classes, fileName) + "]/[Lab: " + labSection + "]");
-								} else if (hasLab(classes, fileName) == false) {
-									System.out.println(getLectureInfo(classes, fileName));
 								}
 							}
 						}
+					} else {
+						System.out.println("Sorry, you entered a faculty ID. Please input a student ID");
 					}
 				} else {
 					System.out.println("Sorry no Student found.");
